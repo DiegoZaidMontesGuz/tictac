@@ -1,99 +1,71 @@
-# -*- coding: utf-8 -*-
-"""
-multiAgents.py
-Implements the Minimax and Negamax algorithms (with alpha–beta pruning)
-for the Tic-Tac-Toe project.
-"""
-
 import numpy as np
-from GameStatus_5120 import GameStatus
+import math
 
 
-# ----------------------------------------------------------------------
-# Minimax with alpha–beta pruning
-# ----------------------------------------------------------------------
-def minimax(game_state, depth, maximizingPlayer, alpha=float("-inf"), beta=float("inf")):
+def minimax(game_state, depth, maximizingPlayer=True):
     """
-    Standard Minimax search.
-    Returns (score, move) where move is (row, col)
-    """
-    terminal = game_state.is_terminal()
-
-    # Base case: terminal state or depth limit
-    if depth == 0 or terminal:
-        score = game_state.get_scores(terminal)
-        return score, None
-
-    best_move = None
-
-    if maximizingPlayer:
-        maxEval = float("-inf")
-        for move in game_state.get_moves():
-            next_state = game_state.get_new_state(move)
-            eval_score, _ = minimax(next_state, depth - 1, False, alpha, beta)
-            if eval_score > maxEval:
-                maxEval = eval_score
-                best_move = move
-            alpha = max(alpha, eval_score)
-            if beta <= alpha:
-                break  # beta cut-off
-        return maxEval, best_move
-
-    else:
-        minEval = float("inf")
-        for move in game_state.get_moves():
-            next_state = game_state.get_new_state(move)
-            eval_score, _ = minimax(next_state, depth - 1, True, alpha, beta)
-            if eval_score < minEval:
-                minEval = eval_score
-                best_move = move
-            beta = min(beta, eval_score)
-            if beta <= alpha:
-                break  # alpha cut-off
-        return minEval, best_move
-
-
-# ----------------------------------------------------------------------
-# Negamax version (simpler, symmetric version of Minimax)
-# ----------------------------------------------------------------------
-def negamax(game_state, depth, alpha=float("-inf"), beta=float("inf"), color=1):
-    """
-    Negamax with alpha–beta pruning.
+    Simple Minimax algorithm for Tic Tac Toe.
     Returns (score, move)
     """
-    terminal = game_state.is_terminal()
-
-    # Base case
-    if depth == 0 or terminal:
-        score = color * game_state.get_negamax_scores(terminal)
+    # Base case — stop if max depth reached or game is over
+    if depth == 0 or game_state.is_terminal():
+        score = game_state.get_scores(terminal=True)
         return score, None
 
     best_move = None
-    best_val = float("-inf")
 
-    for move in game_state.get_moves():
-        next_state = game_state.get_new_state(move)
-        val, _ = negamax(next_state, depth - 1, -beta, -alpha, -color)
-        val = -val
-        if val > best_val:
-            best_val = val
-            best_move = move
-        alpha = max(alpha, val)
-        if alpha >= beta:
-            break  # prune
+    # Maximizing player (human, O)
+    if maximizingPlayer:
+        max_eval = -math.inf
+        for move in get_available_moves(game_state.board_state):
+            child = game_state.get_new_state(move)
+            eval, _ = minimax(child, depth - 1, False)
+            if eval > max_eval:
+                max_eval = eval
+                best_move = move
+        return max_eval, best_move
 
-    return best_val, best_move
-
-
-# ----------------------------------------------------------------------
-# Simple helper to select which algorithm to run
-# ----------------------------------------------------------------------
-def choose_move(game_state, method="minimax", depth=3):
-    """
-    Wrapper for selecting between minimax or negamax
-    """
-    if method.lower() == "minimax":
-        score, move = minimax(game_state, depth, maximizingPlayer=False)
+    # Minimizing player (AI, X)
     else:
-        score, move = negamax(game_state, depth)
-    return score, move
+        min_eval = math.inf
+        for move in get_available_moves(game_state.board_state):
+            child = game_state.get_new_state(move)
+            eval, _ = minimax(child, depth - 1, True)
+            if eval < min_eval:
+                min_eval = eval
+                best_move = move
+        return min_eval, best_move
+
+
+def negamax(game_state, depth, color=1):
+    """
+    Negamax version of Minimax (optional alternative).
+    Uses a single perspective with sign flipping.
+    """
+    if depth == 0 or game_state.is_terminal():
+        return color * game_state.get_negamax_scores(terminal=True), None
+
+    best_score = -math.inf
+    best_move = None
+
+    for move in get_available_moves(game_state.board_state):
+        child = game_state.get_new_state(move)
+        score, _ = negamax(child, depth - 1, -color)
+        score = -score
+        if score > best_score:
+            best_score = score
+            best_move = move
+
+    return best_score, best_move
+
+
+def get_available_moves(board_state):
+    """
+    Return a list of all empty cells on the board [(i, j), ...]
+    """
+    moves = []
+    for i in range(len(board_state)):
+        for j in range(len(board_state[i])):
+            if board_state[i][j] == 0:
+                moves.append((i, j))
+    return moves
