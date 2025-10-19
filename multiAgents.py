@@ -4,8 +4,7 @@ import math
 
 def minimax(game_state, depth, maximizingPlayer=True):
     """
-    Simple Minimax algorithm for Tic Tac Toe.
-    Returns (score, move)
+     Minimax algorithm for Tic Tac Toe.
     """
     # Base case — stop if max depth reached or game is over
     if depth == 0 or game_state.is_terminal():
@@ -39,7 +38,7 @@ def minimax(game_state, depth, maximizingPlayer=True):
 
 def negamax(game_state, depth, color=1):
     """
-    Negamax version of Minimax (optional alternative).
+    Negamax version of Minimax
     Uses a single perspective with sign flipping.
     """
     if depth == 0 or game_state.is_terminal():
@@ -61,7 +60,7 @@ def negamax(game_state, depth, color=1):
 
 def get_available_moves(board_state):
     """
-    Return a list of all empty cells on the board [(i, j), ...]
+    Return a list of all empty cells on the board
     """
     moves = []
     for i in range(len(board_state)):
@@ -69,3 +68,4 @@ def get_available_moves(board_state):
             if board_state[i][j] == 0:
                 moves.append((i, j))
     return moves
+
