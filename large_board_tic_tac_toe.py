@@ -15,7 +15,7 @@ mode = "player_vs_ai"  # default mode for playing the game (player vs AI)
 class RandomBoardTicTacToe:
     def __init__(self, size=(600, 800)):
 
-
+        self.score = 0
         self.Nought = True
         
         self.game_startted = False
@@ -45,7 +45,7 @@ class RandomBoardTicTacToe:
 
         # Initialize pygame
         pygame.init()
-        self.font = pygame.font.Font(None, 20)
+        self.font = pygame.font.Font(None, 40)
         self.game_reset()
 
     # -----------------------------------------------------
@@ -62,12 +62,25 @@ class RandomBoardTicTacToe:
         pygame.draw.line(self.screen, self.BLACK, (50, 300), (50, 750), 6)
         pygame.draw.line(self.screen, self.BLACK, (550, 300), (550, 750), 6)
 
-        self.button_rect = pygame.Rect(70, 120, 80, 20)
-        self.button_rect2 = pygame.Rect(70, 170, 80, 20)
+        self.button_rect = pygame.Rect(10, 120, 140, 40)
+        self.button_rect2 = pygame.Rect(10, 170, 140, 40)
+        self.button_rect3 = pygame.Rect(70, 10, 140, 40)
 
-
+        self.menu = pygame.Rect(480, 80, 140, 40)
+        self.menu2 = pygame.Rect(480, 135, 140, 40)
+        self.menu3 = pygame.Rect(480, 190, 140, 40)
+        self.menu4 = pygame.Rect(200, 100, 140, 40)
+        self.menu5 = pygame.Rect(200, 160, 140, 40)
         #pygame.draw.rect(self.screen, self.BLUE, self.button_rect)
         pygame.draw.rect(self.screen, self.BLUE, self.button_rect2)
+
+        pygame.draw.rect(self.screen, self.WHITE, self.button_rect3)
+
+        pygame.draw.rect(self.screen, self.BLUE, self.menu)
+        pygame.draw.rect(self.screen, self.BLUE, self.menu2)
+        pygame.draw.rect(self.screen, self.BLUE, self.menu3)
+        pygame.draw.rect(self.screen, self.BLUE, self.menu4)
+        pygame.draw.rect(self.screen, self.BLUE, self.menu5)
 
         self.text_surface = self.font.render("Cross", True, self.BLACK)
         self.text_rect = self.text_surface.get_rect(center=self.button_rect.center)
@@ -76,6 +89,39 @@ class RandomBoardTicTacToe:
         self.text_surface2 = self.font.render("Nought", True, self.BLACK)
         self.text_rect2 = self.text_surface2.get_rect(center=self.button_rect2.center)
         self.screen.blit(self.text_surface2, self.text_rect2)
+
+        self.text_surface3 = self.font.render("Reset", True, self.BLACK)
+        self.text_rect3 = self.text_surface3.get_rect(center=self.button_rect3.center)
+        self.screen.blit(self.text_surface3, self.text_rect3)
+
+        self.text_surface3 = self.font.render("Reset", True, self.BLACK)
+        self.text_rect3 = self.text_surface3.get_rect(center=self.button_rect3.center)
+        self.screen.blit(self.text_surface3, self.text_rect3)
+
+        self.menu_surface = self.font.render("3x3", True, self.BLACK)
+        self.menu_rect = self.menu_surface.get_rect(center=self.menu.center)
+        self.screen.blit(self.menu_surface, self.menu_rect)
+
+        self.menu_surface = self.font.render("3x3", True, self.BLACK)
+        self.menu_rect = self.menu_surface.get_rect(center=self.menu.center)
+        self.screen.blit(self.menu_surface, self.menu_rect)
+
+        self.menu_surface2 = self.font.render("4x4", True, self.BLACK)
+        self.menu_rect2 = self.menu_surface2.get_rect(center=self.menu2.center)
+        self.screen.blit(self.menu_surface2, self.menu_rect2)
+
+        self.menu_surface3 = self.font.render("5x5", True, self.BLACK)
+        self.menu_rect3 = self.menu_surface3.get_rect(center=self.menu3.center)
+        self.screen.blit(self.menu_surface3, self.menu_rect3)
+
+        self.menu_surface4 = self.font.render("Score:  " + str(self.score), True, self.BLACK)
+        self.menu_rect4 = self.menu_surface4.get_rect(center=self.menu4.center)
+        self.screen.blit(self.menu_surface4, self.menu_rect4)
+
+        self.menu_surface5 = self.font.render("Winner:  ", True, self.BLACK)
+        self.menu_rect5 = self.menu_surface5.get_rect(center=self.menu5.center)
+        self.screen.blit(self.menu_surface5, self.menu_rect5)
+        # self.reset_text = self.font.render("Reset", True, )
         # Horizontal grid lines
         h = 300
         while h < 750:
@@ -124,9 +170,10 @@ class RandomBoardTicTacToe:
         self.game_state = self.game_state.get_new_state(move)
 
     def play_ai(self):
+        self.score = self.game_state.get_scores(True)
         """Makes the AI move using Minimax or Negamax."""
-        use_negamax = False
-        depth = 100
+        use_negamax =False
+        depth = 4
 
         # Choose and execute the best move
         if use_negamax:
@@ -152,11 +199,29 @@ class RandomBoardTicTacToe:
         if self.is_game_over():
             print("Final Score:", self.game_state.get_scores(True))
 
+            pygame.draw.rect(self.screen, self.BLUE, self.menu5)
+            print("scorewer")
+            if self.score > 0:
+                
+                self.menu_surface5 = self.font.render("Winner:  You", True, self.BLACK)
+                self.menu_rect5 = self.menu_surface5.get_rect(center=self.menu5.center)
+                self.screen.blit(self.menu_surface5, self.menu_rect5)
+            elif self.score < 0:
+                self.menu_surface5 = self.font.render("Winner:  CPU", True, self.BLACK)
+                self.menu_rect5 = self.menu_surface5.get_rect(center=self.menu5.center)
+                self.screen.blit(self.menu_surface5, self.menu_rect5)
+            else:
+                self.menu_surface5 = self.font.render("Winner:  Draw", True, self.BLACK)
+                self.menu_rect5 = self.menu_surface5.get_rect(center=self.menu5.center)
+                self.screen.blit(self.menu_surface5, self.menu_rect5)
+
     def game_reset(self):
         """Resets the board and game state."""
+        self.score = 0
         self.draw_game()
         self.state = np.zeros((self.GRID_SIZE, self.GRID_SIZE), dtype=int)
         self.game_state = GameStatus(self.state, turn_O=True)
+        self.game_startted = False
         pygame.display.update()
 
     # -----------------------------------------------------
@@ -165,11 +230,28 @@ class RandomBoardTicTacToe:
     def play_game(self, mode="player_vs_ai"):
         done = False
         clock = pygame.time.Clock()
-
+        input_text = ""
         while not done:
             for event in pygame.event.get():
+                pygame.draw.rect(self.screen, self.BLUE, self.menu4)
+
+                self.menu_surface4 = self.font.render("Score:  " + str(self.score), True, self.BLACK)
+                self.menu_rect4 = self.menu_surface4.get_rect(center=self.menu4.center)
+                self.screen.blit(self.menu_surface4, self.menu_rect4)
                 if event.type == pygame.QUIT:
                     done = True
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:  # Press Enter to submit
+                        print("You typed:", input_text)
+                        active = False
+                    elif event.key == pygame.K_BACKSPACE:  # Delete last character
+                        input_text = input_text[:-1]
+                    else:
+                        # Add the typed character
+                        input_text += event.unicode
+                    text_surface = self.font.render(input_text, True, self.BLACK)
+                    self.screen.blit(text_surface, (50, 150))
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
@@ -189,7 +271,9 @@ class RandomBoardTicTacToe:
 
                         if self.is_game_over():
                             print("Game Over!")
-                            done = True
+                            
+                                
+                            #done = True
                             break
 
                         # Let AI play right after player move
@@ -212,6 +296,22 @@ class RandomBoardTicTacToe:
                         pygame.draw.rect(self.screen, self.WHITE, self.button_rect)
                         self.screen.blit(self.text_surface, self.text_rect)
                         self.Nought = True
+
+                    if self.button_rect3.collidepoint(mouse_pos):
+                
+                        self.game_reset()
+
+                    if self.menu.collidepoint(mouse_pos) and not self.game_startted :
+                        self.GRID_SIZE = 3
+                        self.game_reset()
+
+                    if self.menu2.collidepoint(mouse_pos)and not self.game_startted :
+                        self.GRID_SIZE = 4
+                        self.game_reset()
+
+                    if self.menu3.collidepoint(mouse_pos)and not self.game_startted :
+                        self.GRID_SIZE = 5
+                        self.game_reset()
 
             pygame.display.update()
             clock.tick(30)
@@ -250,6 +350,7 @@ class RandomBoardTicTacToe:
             h += (550 - 50) / self.GRID_SIZE
             count += 1
         return s
+
 
 
 # -----------------------------------------------------
