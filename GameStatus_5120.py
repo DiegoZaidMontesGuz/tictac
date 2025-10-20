@@ -15,6 +15,8 @@ class GameStatus:
         rows = len(self.board_state)
         cols = len(self.board_state[0])
 
+        
+
         # --- Check rows ---
         for i in range(rows):
             for j in range(cols - 2):
