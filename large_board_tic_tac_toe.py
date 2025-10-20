@@ -163,6 +163,20 @@ class RandomBoardTicTacToe:
         """Checks whether the current game is over."""
         if self.game_state.is_terminal():
             print("Game Over!")
+            pygame.draw.rect(self.screen, self.BLUE, self.menu5)
+            if self.score > 0:
+                
+                self.menu_surface5 = self.font.render("Winner:  You", True, self.BLACK)
+                self.menu_rect5 = self.menu_surface5.get_rect(center=self.menu5.center)
+                self.screen.blit(self.menu_surface5, self.menu_rect5)
+            elif self.score < 0:
+                self.menu_surface5 = self.font.render("Winner:  CPU", True, self.BLACK)
+                self.menu_rect5 = self.menu_surface5.get_rect(center=self.menu5.center)
+                self.screen.blit(self.menu_surface5, self.menu_rect5)
+            else:
+                self.menu_surface5 = self.font.render("Winner:  Draw", True, self.BLACK)
+                self.menu_rect5 = self.menu_surface5.get_rect(center=self.menu5.center)
+                self.screen.blit(self.menu_surface5, self.menu_rect5)
             return True
         return False
 
