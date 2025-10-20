@@ -15,15 +15,20 @@ mode = "player_vs_ai"  # default mode for playing the game (player vs AI)
 class RandomBoardTicTacToe:
     def __init__(self, size=(600, 800)):
 
+
+        self.Nought = True
+        
+        self.game_startted = False
         self.size = self.width, self.height = size
         # Define some colors
         self.BLACK = (0, 0, 0)
         self.WHITE = (255, 255, 255)
         self.GREEN = (0, 255, 0)
         self.RED = (255, 0, 0)
+        self.BLUE = (100,100,250)
 
         # Grid Size
-        self.GRID_SIZE = 5
+        self.GRID_SIZE = 3
         self.OFFSET = 5
         self.state = np.zeros((self.GRID_SIZE, self.GRID_SIZE), dtype=int)
 
@@ -40,7 +45,7 @@ class RandomBoardTicTacToe:
 
         # Initialize pygame
         pygame.init()
-        self.font = pygame.font.Font(None, 200)
+        self.font = pygame.font.Font(None, 20)
         self.game_reset()
 
     # -----------------------------------------------------
@@ -50,13 +55,27 @@ class RandomBoardTicTacToe:
         self.screen = pygame.display.set_mode(self.size)
         pygame.display.set_caption("Tic Tac Toe Random Grid")
         self.screen.fill(self.WHITE)
-
+        
         # Outer borders
         pygame.draw.line(self.screen, self.BLACK, (50, 300), (550, 300), 6)
         pygame.draw.line(self.screen, self.BLACK, (50, 750), (550, 750), 6)
         pygame.draw.line(self.screen, self.BLACK, (50, 300), (50, 750), 6)
         pygame.draw.line(self.screen, self.BLACK, (550, 300), (550, 750), 6)
 
+        self.button_rect = pygame.Rect(70, 120, 80, 20)
+        self.button_rect2 = pygame.Rect(70, 170, 80, 20)
+
+
+        #pygame.draw.rect(self.screen, self.BLUE, self.button_rect)
+        pygame.draw.rect(self.screen, self.BLUE, self.button_rect2)
+
+        self.text_surface = self.font.render("Cross", True, self.BLACK)
+        self.text_rect = self.text_surface.get_rect(center=self.button_rect.center)
+        self.screen.blit(self.text_surface, self.text_rect)
+
+        self.text_surface2 = self.font.render("Nought", True, self.BLACK)
+        self.text_rect2 = self.text_surface2.get_rect(center=self.button_rect2.center)
+        self.screen.blit(self.text_surface2, self.text_rect2)
         # Horizontal grid lines
         h = 300
         while h < 750:
@@ -107,7 +126,7 @@ class RandomBoardTicTacToe:
     def play_ai(self):
         """Makes the AI move using Minimax or Negamax."""
         use_negamax = False
-        depth = 3
+        depth = 100
 
         # Choose and execute the best move
         if use_negamax:
@@ -124,7 +143,10 @@ class RandomBoardTicTacToe:
 
             # Draw AI move on the board
             px, py = self._state_to_position(move)
-            self.draw_cross(px, py)
+            if self.Nought:
+                self.draw_cross(px, py)
+            else:
+                self.draw_circle(px,py)
             pygame.display.update()
 
         if self.is_game_over():
@@ -155,9 +177,13 @@ class RandomBoardTicTacToe:
                     p = self._state_to_position(s)
 
                     # Player (O) move
-                    if self.O_turn and self.state[s[0]][s[1]] == 0:
+                    if self.O_turn and self.state[s[0]][s[1]] == 0 and mouse_pos[1] > 300:
+                        self.game_startted = True
                         self.state[s[0]][s[1]] = 1  # Player O
-                        self.draw_circle(p[0], p[1])
+                        if self.Nought:
+                            self.draw_circle(p[0], p[1])
+                        else:
+                            self.draw_cross(p[0],p[1])
                         self.game_state = self.game_state.get_new_state(s)
                         pygame.display.update()
 
@@ -170,6 +196,22 @@ class RandomBoardTicTacToe:
                         self.O_turn = False
                         self.play_ai()
                         self.O_turn = True
+
+                    if self.button_rect.collidepoint(mouse_pos) and not self.game_startted:
+                        pygame.draw.rect(self.screen, self.BLUE, self.button_rect)
+
+                        self.screen.blit(self.text_surface, self.text_rect)
+                        pygame.draw.rect(self.screen, self.WHITE, self.button_rect2)
+                        self.screen.blit(self.text_surface2, self.text_rect2)
+                        self.Nought = False
+
+                    if self.button_rect2.collidepoint(mouse_pos) and not self.game_startted:
+                        pygame.draw.rect(self.screen, self.BLUE, self.button_rect2)
+
+                        self.screen.blit(self.text_surface2, self.text_rect2)
+                        pygame.draw.rect(self.screen, self.WHITE, self.button_rect)
+                        self.screen.blit(self.text_surface, self.text_rect)
+                        self.Nought = True
 
             pygame.display.update()
             clock.tick(30)
