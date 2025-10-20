@@ -1,97 +1,88 @@
 # -*- coding: utf-8 -*-
-
+import numpy as np
 
 class GameStatus:
+    def __init__(self, board_state, turn_O):
+        self.board_state = np.copy(board_state)
+        self.turn_O = turn_O
+        self.winner = None
 
-
-	def __init__(self, board_state, turn_O):
-
-		self.board_state = board_state
-		self.turn_O = turn_O
-		self.oldScores = 0
-
-		self.winner = ""
-
-
-	def is_terminal(self):
-		for i in self.board_state:
-			for j in i:
-				if j == 0:
-					return False
-		return True
-		"""
-        YOUR CODE HERE TO CHECK IF ANY CELL IS EMPTY WITH THE VALUE 0. IF THERE IS NO EMPTY
-        THEN YOU SHOULD ALSO RETURN THE WINNER OF THE GAME BY CHECKING THE SCORES FOR EACH PLAYER 
+    def is_terminal(self):
         """
-		
-
-	def get_scores(self, terminal):
-		"""
-        YOUR CODE HERE TO CALCULATE THE SCORES. MAKE SURE YOU ADD THE SCORE FOR EACH PLAYER BY CHECKING 
-        EACH TRIPLET IN THE BOARD IN EACH DIRECTION (HORIZONAL, VERTICAL, AND ANY DIAGONAL DIRECTION)
-        
-        YOU SHOULD THEN RETURN THE CALCULATED SCORE WHICH CAN BE POSITIVE (HUMAN PLAYER WINS),
-        NEGATIVE (AI PLAYER WINS), OR 0 (DRAW)
-        
-        """        
-		rows = len(self.board_state)
-		cols = len(self.board_state[0])
-		scores = 0
-		check_point = 3 if terminal else 2
-
-		for  s in self.board_state:
-			for  index in range(rows):
-				if index + 3 > rows:
-					break
-				if s[index] == 1 and s[index + 1] == 1 and s[index + 2] == 1:
-					scores += 1
-				if s[index] == 2 and s[index + 1] == 2 and s[index + 2] == 2:
-					scores -= 1
-		
-		for i in range(rows):
-			if i + 3 > rows:
-					break
-			for j in range(rows):
-				if self.board_state[i][j] == 1 and self.board_state[i + 1][j] == 1 and self.board_state[i + 2][j] == 1:
-					scores += 1
-				if self.board_state[i][j] == 2 and self.board_state[i + 1][j] == 2 and self.board_state[i + 2][j] == 2:
-					scores += 1
-
-		cross_times = rows - 2
-
-		for c in range(cross_times):
-			if self.board_state[c][c] == 1 and self.board_state[c + 1][c + 1] == 1 and self.board_state[c + 2][c + 2] == 1:
-				scores += 1
-			if self.board_state[c][c] == 2 and self.board_state[c + 1][c + 1] == 2 and self.board_state[c + 2][c + 2] == 2:
-				scores -= 1
-		
-		
-	    
-
-	def get_negamax_scores(self, terminal):
-		"""
-        YOUR CODE HERE TO CALCULATE NEGAMAX SCORES. THIS FUNCTION SHOULD EXACTLY BE THE SAME OF GET_SCORES UNLESS
-        YOU SET THE SCORE FOR NEGAMX TO A VALUE THAT IS NOT AN INCREMENT OF 1 (E.G., YOU CAN DO SCORES = SCORES + 100 
-                                                                               FOR HUMAN PLAYER INSTEAD OF 
-                                                                               SCORES = SCORES + 1)
+        Checks if the game has ended.
+        Returns True if a player has won or the board is full.
         """
-		rows = len(self.board_state)
-		cols = len(self.board_state[0])
-		scores = 0
-		check_point = 3 if terminal else 2
-	    
+        rows = len(self.board_state)
+        cols = len(self.board_state[0])
 
-	def get_moves(self):
-		moves = []
-		"""
-        YOUR CODE HERE TO ADD ALL THE NON EMPTY CELLS TO MOVES VARIABLES AND RETURN IT TO BE USE BY YOUR
-        MINIMAX OR NEGAMAX FUNCTIONS
+        # --- Check rows ---
+        for i in range(rows):
+            for j in range(cols - 2):
+                if self.board_state[i][j] != 0 and \
+                   self.board_state[i][j] == self.board_state[i][j + 1] == self.board_state[i][j + 2]:
+                    self.winner = self.board_state[i][j]
+                    return True
+
+        # --- Check columns ---
+        for j in range(cols):
+            for i in range(rows - 2):
+                if self.board_state[i][j] != 0 and \
+                   self.board_state[i][j] == self.board_state[i + 1][j] == self.board_state[i + 2][j]:
+                    self.winner = self.board_state[i][j]
+                    return True
+
+        # --- Check diagonals ---
+        for i in range(rows - 2):
+            for j in range(cols - 2):
+                # Down-right diagonal
+                if self.board_state[i][j] != 0 and \
+                   self.board_state[i][j] == self.board_state[i + 1][j + 1] == self.board_state[i + 2][j + 2]:
+                    self.winner = self.board_state[i][j]
+                    return True
+
+                # Down-left diagonal
+                if self.board_state[i][j + 2] != 0 and \
+                   self.board_state[i][j + 2] == self.board_state[i + 1][j + 1] == self.board_state[i + 2][j]:
+                    self.winner = self.board_state[i][j + 2]
+                    return True
+
+        # --- Check for draw (no empty spaces) ---
+        if not (0 in self.board_state):
+            self.winner = 0
+            return True
+
+        return False
+
+    def get_scores(self, terminal):
         """
-		return moves
+        Computes a simple evaluation score for the board.
+        +1 if O (human) wins
+        -1 if X (AI) wins
+         0 otherwise or draw
+        """
+        if self.winner == 1:
+            return 1
+        elif self.winner == -1 or self.winner == 2:
+            return -1
+        else:
+            return 0
 
+    def get_negamax_scores(self, terminal):
+        """Same as get_scores for Negamax."""
+        return self.get_scores(terminal)
 
-	def get_new_state(self, move):
-		new_board_state = self.board_state.copy()
-		x, y = move[0], move[1]
-		new_board_state[x,y] = 1 if self.turn_O else -1
-		return GameStatus(new_board_state, not self.turn_O)
+    def get_moves(self):
+        """Returns all empty cells."""
+        moves = []
+        for i in range(len(self.board_state)):
+            for j in range(len(self.board_state[i])):
+                if self.board_state[i][j] == 0:
+                    moves.append((i, j))
+        return moves
+
+    def get_new_state(self, move):
+        """Returns a new GameStatus object after making a move."""
+        new_board = np.copy(self.board_state)
+        x, y = move
+        new_board[x, y] = 1 if self.turn_O else -1
+        return GameStatus(new_board, not self.turn_O)
